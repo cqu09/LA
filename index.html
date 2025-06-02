@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Landscape & Urban Visionaries Matching Challenge</title>
+    <style>
+        body {
+            transform: scale(0.75);       /* 缩放为50% */
+            transform-origin: center center
+            
+            font-family: 'Arial', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            background-image: url('http://images.unsplash.com/photo-1568515387631-8b650bbcdb90?&auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        .content-wrapper {
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .game-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .column-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #34495e;
+            color: white;
+            border-radius: 5px;
+        }
+        .card {
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .card.selected {
+            background-color: #f39c12;
+            animation: pulse 1.5s infinite;
+        }
+        .card.matched {
+            background-color: #2ecc71;
+            cursor: default;
+            transform: scale(0.98);
+        }
+        .card.matched::after {
+            content: "✓";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        button:hover {
+            background-color: #1a252f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 18px;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 0 20px;
+        }
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        .message {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            min-height: 30px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background-color: #ecf0f1;
+        }
+        .message.show {
+            opacity: 1;
+        }
+        .instructions {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes confetti-fall {
+            0% { 
+                transform: translateY(-100px) rotate(0deg); 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100vh) rotate(360deg); 
+                opacity: 0;
+            }
+        }
+        .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1>Landscape & Urban Visionaries Matching Challenge</h1>
+        <div class="subtitle">Match the thinkers with their influential works</div>
+        
+        <div class="instructions">
+            <p>✨ <strong>How to play:</strong> Select one visionary from the left column and one work from the right column, then click "Check Match"</p>
+            <p> Learn about the influential figures who shaped our understanding of urban spaces</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div>Attempts</div>
+                <div class="stat-value" id="attempts">0</div>
+            </div>
+            <div class="stat-box">
+                <div>Correct Matches</div>
+                <div class="stat-value" id="matches">0</div>
+            </div>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="game-container" id="game-container">
+            <div class="column">
+                <div class="column-header">Urban Thinkers</div>
+                <div id="thinkers-column"></div>
+            </div>
+            <div class="column">
+                <div class="column-header">Their Influential Works</div>
+                <div id="works-column"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="check">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+                Check Match
+            </button>
+            <button id="restart">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                </svg>
+                Restart Game
+            </button>
+            <button id="show-all">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+                Reveal All
+            </button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        // Thinker-work pairs data (removed Sasaki, Waldheim, Halprin as requested)
+        const pairs = [
+            { thinker: "Frederick Law Olmsted", work: "New York Central Park" },
+            { thinker: "Ian McHarg", work: "Design With Nature" },
+            { thinker: "Jane Jacobs", work: "The Death and Life of Great American Cities" },
+            { thinker: "Kevin Lynch", work: "The Image of the City" },
+            { thinker: "Le Corbusier", work: "Radiant City" },
+            { thinker: "Peter Walker", work: "Tanner Fountain, Harvard University" },
+            { thinker: "Dan Kiley", work: "Miller Garden" }
+        ];
+
+        // Game state variables
+        let selectedThinker = null;
+        let selectedWork = null;
+        let matchedPairs = 0;
+        let attemptCount = 0;
+        let gameActive = true;
+
+        // DOM elements
+        const thinkersColumn = document.getElementById('thinkers-column');
+        const worksColumn = document.getElementById('works-column');
+        const attemptDisplay = document.getElementById('attempts');
+        const matchesDisplay = document.getElementById('matches');
+        const messageDisplay = document.getElementById('message');
+        const restartButton = document.getElementById('restart');
+        const checkButton = document.getElementById('check');
+        const showAllButton = document.getElementById('show-all');
+        const celebrationElement = document.getElementById('celebration');
+
+        // Initialize game
+        function initGame() {
+            // Reset game state
+            selectedThinker = null;
+            selectedWork = null;
+            matchedPairs = 0;
+            attemptCount = 0;
+            gameActive = true;
+            
+            // Update display
+            attemptDisplay.textContent = attemptCount;
+            matchesDisplay.textContent = matchedPairs;
+            hideMessage();
+            
+            // Clear columns
+            thinkersColumn.innerHTML = '';
+            worksColumn.innerHTML = '';
+            
+            // Shuffle thinkers and works separately
+            const shuffledThinkers = shuffleArray([...pairs]);
+            const shuffledWorks = shuffleArray([...pairs]);
+            
+            // Create thinker cards
+            shuffledThinkers.forEach((pair, index) => {
+                const thinkerCard = document.createElement('div');
+                thinkerCard.classList.add('card');
+                thinkerCard.textContent = pair.thinker;
+                thinkerCard.dataset.thinker = pair.thinker;
+                thinkerCard.dataset.index = index;
+                
+                thinkerCard.addEventListener('click', () => selectThinker(thinkerCard));
+                
+                thinkersColumn.appendChild(thinkerCard);
+            });
+            
+            // Create work cards
+            shuffledWorks.forEach((pair, index) => {
+                const workCard = document.createElement('div');
+                workCard.classList.add('card');
+                workCard.textContent = pair.work;
+                workCard.dataset.work = pair.work;
+                workCard.dataset.thinker = pair.thinker;
+                workCard.dataset.index = index;
+                
+                workCard.addEventListener('click', () => selectWork(workCard));
+                
+                worksColumn.appendChild(workCard);
+            });
+        }
+
+        // Shuffle array
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Select a thinker
+        function selectThinker(card) {
+            if (!gameActive || card.classList.contains('matched')) return;
+            
+            // Deselect previous selection
+            if (selectedThinker) {
+                selectedThinker.classList.remove('selected');
+            }
+            
+            // Select new thinker
+            selectedThinker = card;
+            card.classList.add('selected');
+            
+            // If both thinker and work are selected, check for match
+            if (selectedThinker && selectedWork) {
+                checkMatch();
+            }
+        }
+
+        // Select a work
+        function selectWork(card) {
+            if (!gameActive || card.classList.contains('matched')) return;
+            
+            // Deselect previous selection
+            if (selectedWork) {
+                selectedWork.classList.remove('selected');
+            }
+            
+            // Select new work
+            selectedWork = card;
+            card.classList.add('selected');
+            
+            // If both thinker and work are selected, check for match
+            if (selectedThinker && selectedWork) {
+                checkMatch();
+            }
+        }
+
+        // Check if selected thinker and work match
+        function checkMatch() {
+            if (!selectedThinker || !selectedWork) return;
+            
+            attemptCount++;
+            attemptDisplay.textContent = attemptCount;
+            
+            const thinkerName = selectedThinker.dataset.thinker;
+            const workThinker = selectedWork.dataset.thinker;
+            
+            if (thinkerName === workThinker) {
+                // Match found
+                selectedThinker.classList.remove('selected');
+                selectedThinker.classList.add('matched');
+                selectedWork.classList.remove('selected');
+                selectedWork.classList.add('matched');
+                
+                matchedPairs++;
+                matchesDisplay.textContent = matchedPairs;
+                
+                showMessage("Correct match! Well done!", "success");
+                
+                // Check if game is complete
+                if (matchedPairs === pairs.length) {
+                    gameActive = false;
+                    showMessage(`Congratulations! You completed the challenge in ${attemptCount} attempts.`, "success");
+                    createConfetti();
+                }
+            } else {
+                // No match
+                showMessage("Not a match. Try again!", "error");
+            }
+            
+            // Reset selections
+            selectedThinker = null;
+            selectedWork = null;
+        }
+
+        // Show message with animation
+        function showMessage(text, type) {
+            messageDisplay.textContent = text;
+            messageDisplay.className = "message show";
+            messageDisplay.style.color = type === "success" ? "#2ecc71" : "#e74c3c";
+            
+            setTimeout(hideMessage, 3000);
+        }
+
+        function hideMessage() {
+            messageDisplay.className = "message";
+        }
+
+        // Show all answers
+        function showAllAnswers() {
+            const allThinkerCards = thinkersColumn.querySelectorAll('.card');
+            const allWorkCards = worksColumn.querySelectorAll('.card');
+            
+            allThinkerCards.forEach(thinkerCard => {
+                thinkerCard.classList.add('matched');
+            });
+            
+            allWorkCards.forEach(workCard => {
+                workCard.classList.add('matched');
+            });
+            
+            gameActive = false;
+            showMessage("All matches are now visible.", "info");
+        }
+
+        // Create confetti animation
+        function createConfetti() {
+            celebrationElement.style.display = "block";
+            const colors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement("div");
+                confetti.className = "confetti";
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.width = Math.random() * 10 + 5 + "px";
+                confetti.style.height = Math.random() * 10 + 5 + "px";
+                confetti.style.animation = "confetti-fall " + (Math.random() * 3 + 2) + "s linear forwards";
+                confetti.style.animationDelay = Math.random() * 2 + "s";
+                celebrationElement.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                celebrationElement.style.display = "none";
+                celebrationElement.innerHTML = "";
+            }, 5000);
+        }
+
+        // Event listeners
+        restartButton.addEventListener('click', initGame);
+        checkButton.addEventListener('click', () => {
+            if (selectedThinker && selectedWork) {
+                checkMatch();
+            } else {
+                showMessage("Please select one thinker and one work to check.", "error");
+            }
+        });
+        showAllButton.addEventListener('click', showAllAnswers);
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
